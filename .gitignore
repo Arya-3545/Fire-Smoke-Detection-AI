@@ -187,3 +187,26 @@ __pycache__/
 .vscode/
 .ipynb_checkpoints/
 dataset/
+*.pt
+*.h5
+.env
+.vscode/
+.ipynb_checkpoints/
+dataset/
+# ===============================
+# FlareGuard - MobileNet Project
+# ===============================
+
+# Model files
+*.keras
+*.h5
+*.ckpt
+
+# Dataset (large files)
+flareguard/dataset/
+dataset/
+
+# Training outputs
+logs/
+checkpoints/
+

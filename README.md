@@ -1,31 +1,35 @@
+
+
 # 🔥 FireGuard AI – Intelligent Fire & Smoke Detection System
 
 ## 📌 Project Overview
 
-FireGuard AI is a deep learning–based fire and smoke detection system designed to identify potential fire hazards in real time using computer vision techniques. The system leverages a YOLO-based object detection model to accurately detect fire and smoke from images or video streams, enabling faster alerts and improved safety monitoring.
+FireGuard AI is a deep learning–based fire and smoke detection system designed to identify potential fire hazards in real time using computer vision techniques.
 
-This project focuses on improving early detection reliability by combining high-quality datasets with optimized deep learning models suitable for real-world deployment.
+The system now leverages a **MobileNet-based Convolutional Neural Network (CNN)** as its backbone architecture for efficient and lightweight fire and smoke detection. MobileNet enables high accuracy while maintaining low computational cost, making the model suitable for edge devices and real-time deployment scenarios.
+
+This project focuses on improving early detection reliability by combining a well-annotated dataset with an optimized lightweight deep learning model suitable for real-world safety monitoring systems.
 
 ---
 
 ## 🎯 Objectives
 
-* Detect **fire and smoke** in images and videos with high accuracy
+* Detect fire and smoke in images and videos with high accuracy
 * Reduce false alarms compared to traditional sensor-based systems
 * Enable real-time detection for safety monitoring applications
-* Build a scalable and easy-to-deploy AI model
+* Build a lightweight, scalable, and edge-device-friendly AI model
 
 ---
 
 ## 🧠 Technologies Used
 
-* **Python 3**
-* **YOLO (You Only Look Once)** – Object Detection Model
-* **PyTorch**
-* **OpenCV**
-* **NumPy**
-* **Matplotlib**
-* **Kaggle Dataset (Fire & Smoke Detection)**
+* Python 3
+* MobileNet (Lightweight CNN Architecture)
+* PyTorch
+* OpenCV
+* NumPy
+* Matplotlib
+* Kaggle Fire & Smoke Dataset
 
 ---
 
@@ -40,7 +44,7 @@ Fire-Smoke-Detection-AI/
 │   └── test/
 │
 ├── models/
-│   └── best.pt
+│   └── best_model.pth
 │
 ├── notebooks/
 │   └── training.ipynb
@@ -50,20 +54,24 @@ Fire-Smoke-Detection-AI/
 │
 ├── README.md
 ├── requirements.txt
-└── data.yaml
+└── config.yaml
 ```
 
 ---
 
 ## 📊 Dataset Information
 
-* **Dataset Name:** Smoke-Fire Detection Dataset
-* **Classes:**
+**Dataset Name:** Smoke-Fire Detection Dataset
+**Source:** Kaggle (Public Dataset)
 
-  * 0 → Smoke
-  * 1 → Fire
-* **Source:** Kaggle (Public Dataset)
-* **Format:** YOLO annotation format
+**Classes:**
+
+* 0 → Smoke
+* 1 → Fire
+
+**Format:** Image classification format (labeled images organized into class folders)
+
+> Note: Since MobileNet is used as a CNN classifier backbone, the dataset is structured in image classification format instead of YOLO annotation format.
 
 ---
 
@@ -86,66 +94,69 @@ pip install -r requirements.txt
 
 ## 🚀 Training the Model
 
+Example PyTorch-based training approach:
+
 ```bash
-yolo train model=yolov8n.pt data=data.yaml epochs=50 imgsz=640
+python training.py --epochs 30 --batch_size 32 --img_size 224
 ```
+
+MobileNet (pretrained on ImageNet) is fine-tuned for binary classification (Fire / Smoke).
 
 ---
 
 ## 🔍 Running Inference
 
 ```bash
-yolo predict model=best.pt source=your_image_or_video.mp4
+python detect.py --source your_image_or_video.mp4
 ```
 
----
+### Output
 
-## 📈 Output
-
-* Bounding boxes for **Fire** and **Smoke**
-* Confidence scores for each detection
-* Real-time visualization (optional)
+* Class prediction (Fire / Smoke)
+* Confidence score
+* Real-time visualization using OpenCV
 
 ---
 
-## 🧪 Evaluation Metrics
+## 📈 Evaluation Metrics
 
+* Accuracy
 * Precision
 * Recall
-* mAP (mean Average Precision)
+* F1-Score
+* Confusion Matrix
 
 ---
 
 ## 💡 Future Enhancements
 
 * Real-time CCTV integration
-* Alert system using SMS / Email
-* Smoke density estimation
+* SMS / Email alert system
+* Smoke intensity estimation
 * Deployment on edge devices (Raspberry Pi, Jetson Nano)
+* Integration with IoT-based alarm systems
 
 ---
 
 ## 👥 Team Members
 
-| Name     | Role                              |
-| -------- | --------------------------------- |
+| Name           | Role                              |
+| -------------- | --------------------------------- |
 | Arsha S Pillai | Model Training & Dataset Handling |
-| Arya Selvan | Model Optimization & Evaluation   |
-| Disna Elcy | Documentation & Deployment        |
+| Arya Selvan    | Model Optimization & Evaluation   |
+| Disna Elcy     | Documentation & Deployment        |
 | Abhinaya Baiju | Testing & Visualization           |
 
 ---
 
 ## 📜 License
 
-This project is for academic and educational purposes.
+This project is developed for academic and educational purposes.
 
 ---
 
 ## 📬 Contact
 
-For any queries or collaboration:
-📧 Email: aryaselvan11@gmail.com
-
----
+For queries or collaboration:
+📧 Email: [aryaselvan11@gmail.com](mailto:aryaselvan11@gmail.com)
 

@@ -66,8 +66,9 @@ Fire-Smoke-Detection-AI/
 
 **Classes:**
 
-* 1 → Smoke
-* 0 → Fire
+* 0 → fire
+* 2→ smoke
+* 1 → normal
 
 **Format:** Image classification format (labeled images organized into class folders)
 

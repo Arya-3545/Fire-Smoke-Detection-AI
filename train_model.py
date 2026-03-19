@@ -2,61 +2,97 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras import layers, models
+import os
 
-# Image settings
-img_size = (224, 224)
-batch_size = 16
+# =========================
+# DATASET PATH
+# =========================
+dataset_path = "dataset/"
 
-# Data generator
-datagen = ImageDataGenerator(
+# =========================
+# IMAGE SETTINGS
+# =========================
+IMG_SIZE = 224
+BATCH_SIZE = 16
+
+# =========================
+# DATA AUGMENTATION (IMPORTANT)
+# =========================
+train_datagen = ImageDataGenerator(
     rescale=1./255,
-    validation_split=0.2
+    validation_split=0.2,
+    rotation_range=20,
+    zoom_range=0.2,
+    horizontal_flip=True
 )
 
-train_data = datagen.flow_from_directory(
-    "dataset/",
-    target_size=img_size,
-    batch_size=batch_size,
+# =========================
+# LOAD TRAIN DATA
+# =========================
+train_data = train_datagen.flow_from_directory(
+    dataset_path,
+    target_size=(IMG_SIZE, IMG_SIZE),
+    batch_size=BATCH_SIZE,
     class_mode='categorical',
     subset='training'
 )
 
-val_data = datagen.flow_from_directory(
-    "dataset/",
-    target_size=img_size,
-    batch_size=batch_size,
+# =========================
+# LOAD VALIDATION DATA
+# =========================
+val_data = train_datagen.flow_from_directory(
+    dataset_path,
+    target_size=(IMG_SIZE, IMG_SIZE),
+    batch_size=BATCH_SIZE,
     class_mode='categorical',
     subset='validation'
 )
 
-# Load base model
+# =========================
+# LOAD PRETRAINED MODEL
+# =========================
 base_model = MobileNetV2(
-    input_shape=(224,224,3),
+    weights='imagenet',
     include_top=False,
-    weights='imagenet'
+    input_shape=(IMG_SIZE, IMG_SIZE, 3)
 )
 
 base_model.trainable = False
 
-# Build model
+# =========================
+# BUILD MODEL
+# =========================
 model = models.Sequential([
     base_model,
     layers.GlobalAveragePooling2D(),
     layers.Dense(128, activation='relu'),
-    layers.Dense(3, activation='softmax')
+    layers.Dropout(0.3),
+    layers.Dense(3, activation='softmax')  # fire, normal, smoke
 ])
 
-# Compile
+# =========================
+# COMPILE MODEL
+# =========================
 model.compile(
     optimizer='adam',
     loss='categorical_crossentropy',
     metrics=['accuracy']
 )
 
-# Train
-model.fit(train_data, validation_data=val_data, epochs=3)
+# =========================
+# TRAIN MODEL
+# =========================
+EPOCHS = 10
 
-# SAVE MODEL (THIS CREATES .keras FILE)
+history = model.fit(
+    train_data,
+    validation_data=val_data,
+    epochs=EPOCHS
+)
+
+# =========================
+# SAVE MODEL
+# =========================
 model.save("fire_smoke_model.keras")
 
-print("✅ Model created successfully!")
+print("✅ Model trained and saved successfully!")

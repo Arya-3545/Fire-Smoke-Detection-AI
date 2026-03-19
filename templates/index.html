@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>🔥 Fire Detection AI</title>
+
+<style>
+body {
+    background: linear-gradient(135deg, #020617, #0f172a);
+    color: white;
+    text-align: center;
+    font-family: 'Segoe UI';
+}
+
+h1 {
+    color: orange;
+    font-size: 40px;
+}
+
+video {
+    border: 4px solid orange;
+    border-radius: 15px;
+    box-shadow: 0 0 20px orange;
+    margin-top: 20px;
+}
+
+/* Buttons */
+.btn {
+    background: linear-gradient(135deg, orange, red);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    margin: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 16px;
+}
+
+.btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px orange;
+}
+
+/* Inputs */
+input {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    margin: 5px;
+    width: 250px;
+}
+
+/* Status */
+#status {
+    font-size: 28px;
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* Alert animation */
+.alert {
+    background: red;
+    animation: blink 0.7s infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0.3; }
+}
+
+/* FULL SCREEN EMERGENCY */
+#overlay {
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:red;
+    color:white;
+    font-size:50px;
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+    animation: blink 0.7s infinite;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🔥 AI Fire & Smoke Detection System</h1>
+
+<!-- Buttons -->
+<button class="btn" onclick="useWebcam()">📷 Use Webcam</button>
+<button class="btn" onclick="connectCCTV()">📡 Connect Device</button>
+
+<br>
+
+<!-- Inputs -->
+<input id="rtsp" placeholder="Device Link (IP Webcam / CCTV)">
+<input id="location" placeholder="Location (e.g., Living Room)">
+
+<br>
+
+<!-- Video -->
+<video id="video" width="600" autoplay></video>
+
+<p id="status">Select mode to start</p>
+<h3 id="assistant"></h3>
+
+<!-- 🚨 FULL SCREEN ALERT -->
+<div id="overlay">
+🚨 EMERGENCY 🚨
+</div>
+
+<script>
+const video = document.getElementById('video');
+const statusText = document.getElementById('status');
+const assistant = document.getElementById('assistant');
+const overlay = document.getElementById('overlay');
+
+// 🔊 Emergency Siren
+const alarm = new Audio("https://www.soundjay.com/misc/sounds/fire-truck-siren.mp3");
+alarm.loop = true;
+
+let alarmPlaying = false;
+
+function startAlarm() {
+    if (!alarmPlaying) {
+        alarm.play();
+        alarmPlaying = true;
+    }
+}
+
+function stopAlarm() {
+    if (alarmPlaying) {
+        alarm.pause();
+        alarm.currentTime = 0;
+        alarmPlaying = false;
+    }
+}
+
+// 🧠 Smart voice
+let lastSpoken = 0;
+function speak(text) {
+    const now = Date.now();
+    if (now - lastSpoken > 4000) {
+        const msg = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.speak(msg);
+        lastSpoken = now;
+    }
+}
+
+let mode = "";
+let history = [];
+
+// =========================
+// WEBCAM
+// =========================
+function useWebcam() {
+    mode = "webcam";
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => video.srcObject = stream)
+    .catch(() => alert("Camera access denied"));
+}
+
+// =========================
+// CONNECT DEVICE
+// =========================
+function connectCCTV() {
+    let url = document.getElementById("rtsp").value;
+    let location = document.getElementById("location").value;
+
+    if (!url) return alert("Enter device link");
+
+    if (url.startsWith("http") && !url.includes("/video")) {
+        url += "/video";
+    }
+
+    mode = "cctv";
+
+    fetch('/set_camera', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ rtsp: url })
+    });
+
+    alert("✅ Connected to " + location);
+}
+
+// =========================
+// LOOP (FAST)
+// =========================
+setInterval(() => {
+
+    if (!mode) return;
+
+    let imageData = "";
+
+    if (mode === "webcam") {
+        if (!video.videoWidth) return;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        canvas.getContext("2d").drawImage(video, 0, 0);
+        imageData = canvas.toDataURL("image/jpeg");
+    }
+
+    fetch('/predict', {
+        method: 'POST',
+        body: JSON.stringify({image: imageData, mode: mode}),
+        headers: {'Content-Type':'application/json'}
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        // Ignore very weak predictions
+        if (data.confidence < 0.4) {
+            statusText.innerText = "Detecting...";
+            return;
+        }
+
+        // Stability
+        history.push(data.label);
+        if (history.length > 3) history.shift();
+
+        const count = {};
+        history.forEach(l => count[l] = (count[l]||0)+1);
+
+        let finalLabel = Object.keys(count).reduce((a,b)=>
+            count[a] > count[b] ? a : b
+        );
+
+        statusText.innerText = finalLabel + " (" + data.confidence + ")";
+
+        if (finalLabel === "fire") {
+            statusText.classList.add("alert");
+            overlay.style.display = "flex";
+
+            startAlarm();
+            speak("Fire detected! Evacuate immediately!");
+
+            assistant.innerText = "🚨 FIRE DETECTED! EVACUATE!";
+        }
+        else if (finalLabel === "smoke") {
+            statusText.classList.add("alert");
+            overlay.style.display = "none";
+
+            startAlarm();
+            speak("Smoke detected! Check immediately!");
+
+            assistant.innerText = "⚠️ SMOKE DETECTED!";
+        }
+        else {
+            statusText.classList.remove("alert");
+            overlay.style.display = "none";
+
+            stopAlarm();
+
+            assistant.innerText = "✅ Area is safe";
+        }
+
+    });
+
+}, 500);
+
+</script>
+
+</body>
+</html>

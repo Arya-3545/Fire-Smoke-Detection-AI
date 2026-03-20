@@ -1,50 +1,84 @@
 body {
     margin: 0;
-    background: #0f172a;
+    font-family: 'Poppins', sans-serif;
     color: white;
-    font-family: 'Segoe UI', sans-serif;
     text-align: center;
-}
+    height: 100vh;
+    overflow-x: hidden;
 
-.container {
-    padding: 30px;
+    /* 🔥 FIXED FULL BACKGROUND */
+    background: linear-gradient(rgba(2,6,23,0.85), rgba(2,6,23,0.95)),
+                url('https://images.unsplash.com/photo-1535223289827-42f1e9919769?q=80&w=2070');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 h1 {
     font-size: 40px;
-    color: #f97316;
-}
-
-.subtitle {
-    color: #94a3b8;
+    color: #00f5ff;
+    text-shadow: 0 0 10px #00f5ff;
 }
 
 .video-box {
     margin-top: 20px;
-    border: 3px solid #f97316;
-    display: inline-block;
-    border-radius: 10px;
-    overflow: hidden;
 }
 
-img {
-    width: 700px;
+video {
+    border-radius: 15px;
+    border: 2px solid #00f5ff;
+    box-shadow: 0 0 20px #00f5ff;
+}
+
+.controls {
+    margin: 20px;
+}
+
+button {
+    background: linear-gradient(135deg, #00f5ff, #0ea5e9);
+    border: none;
+    padding: 12px 20px;
+    margin: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: black;
+    font-weight: bold;
+}
+
+button:hover {
+    transform: scale(1.1);
+}
+
+input {
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    margin: 5px;
 }
 
 .status {
-    margin-top: 20px;
-    font-size: 18px;
-    color: #22c55e;
+    font-size: 26px;
+    margin-top: 15px;
 }
+
 .alert {
-    background: red;
-    color: white;
-    padding: 15px;
-    font-size: 30px;
-    border-radius: 10px;
+    color: red;
+    font-weight: bold;
     animation: blink 0.7s infinite;
 }
 
 @keyframes blink {
     50% { opacity: 0.3; }
+}
+
+.overlay {
+    display:none;
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:red;
+    color:white;
+    font-size:60px;
+    justify-content:center;
+    align-items:center;
 }
